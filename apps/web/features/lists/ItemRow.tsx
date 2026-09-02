@@ -54,7 +54,7 @@ export function ItemRow({
         animate={controls}
         onDragEnd={onDragEnd}
         onClick={() => revealed && (controls.start({ x: 0 }), setRevealed(false))}
-        className="flex items-center gap-3 bg-white px-4 py-3 dark:bg-neutral-900"
+        className="relative z-10 flex items-center gap-3 bg-white px-4 py-3 dark:bg-neutral-900"
       >
         <button
           onClick={() => canEdit && onToggle(!item.is_completed)}
