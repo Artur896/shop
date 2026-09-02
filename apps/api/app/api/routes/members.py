@@ -32,7 +32,9 @@ async def invite_member(
         db, list_id, user.id, payload.email, payload.role
     )
     await db.commit()
-    return InvitationOut.model_validate(invitation)
+    out = InvitationOut.model_validate(invitation)
+    out.list_name = invitation.shopping_list.name if invitation.shopping_list else None
+    return out
 
 
 @router.delete("/lists/{list_id}/members/{user_id}", status_code=status.HTTP_204_NO_CONTENT)

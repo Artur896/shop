@@ -1,5 +1,7 @@
 import pytest
 
+pytestmark = pytest.mark.asyncio(loop_scope="session")
+
 
 async def _register(client, name, email):
     r = await client.post("/auth/register", json={"name": name, "email": email, "password": "supersecret1"})
@@ -12,7 +14,6 @@ def _auth(token):
     return {"Authorization": f"Bearer {token}"}
 
 
-@pytest.mark.asyncio
 async def test_list_and_item_crud(client):
     token, _ = await _register(client, "Owner", "owner@example.com")
 
@@ -42,7 +43,6 @@ async def test_list_and_item_crud(client):
     assert deleted.status_code == 204
 
 
-@pytest.mark.asyncio
 async def test_sharing_and_isolation(client):
     owner_token, _ = await _register(client, "Owner2", "owner2@example.com")
     viewer_token, viewer_id = await _register(client, "Viewer", "viewer@example.com")

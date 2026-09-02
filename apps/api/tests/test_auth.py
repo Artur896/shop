@@ -1,7 +1,8 @@
 import pytest
 
+pytestmark = pytest.mark.asyncio(loop_scope="session")
 
-@pytest.mark.asyncio
+
 async def test_register_login_me(client):
     register = await client.post(
         "/auth/register",
@@ -29,7 +30,6 @@ async def test_register_login_me(client):
     assert me.json()["email"] == "ada@example.com"
 
 
-@pytest.mark.asyncio
 async def test_refresh_flow(client):
     register = await client.post(
         "/auth/register",

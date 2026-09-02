@@ -90,8 +90,6 @@ def upgrade() -> None:
 
     list_role = postgresql.ENUM("owner", "editor", "viewer", name="list_role")
     member_status = postgresql.ENUM("active", "removed", name="member_status")
-    list_role.create(op.get_bind(), checkfirst=True)
-    member_status.create(op.get_bind(), checkfirst=True)
 
     op.create_table(
         "list_members",
@@ -124,8 +122,6 @@ def upgrade() -> None:
     invitation_status = postgresql.ENUM(
         "pending", "accepted", "rejected", "expired", name="invitation_status"
     )
-    invitation_role.create(op.get_bind(), checkfirst=True)
-    invitation_status.create(op.get_bind(), checkfirst=True)
 
     op.create_table(
         "invitations",
@@ -170,7 +166,6 @@ def upgrade() -> None:
         "ITEM_COMPLETED",
         name="notification_type",
     )
-    notification_type.create(op.get_bind(), checkfirst=True)
 
     op.create_table(
         "notifications",
@@ -218,8 +213,6 @@ def upgrade() -> None:
 
     ai_provider = postgresql.ENUM("chatgpt", "claude", "gemini", name="ai_provider")
     ai_integration_status = postgresql.ENUM("connected", "disconnected", name="ai_integration_status")
-    ai_provider.create(op.get_bind(), checkfirst=True)
-    ai_integration_status.create(op.get_bind(), checkfirst=True)
 
     op.create_table(
         "ai_integrations",
@@ -263,8 +256,6 @@ def upgrade() -> None:
 
     actor_type = postgresql.ENUM("user", "ai", "system", name="actor_type")
     audit_result = postgresql.ENUM("success", "failure", "denied", name="audit_result")
-    actor_type.create(op.get_bind(), checkfirst=True)
-    audit_result.create(op.get_bind(), checkfirst=True)
 
     op.create_table(
         "audit_logs",

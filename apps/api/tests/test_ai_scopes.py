@@ -1,5 +1,7 @@
 import pytest
 
+pytestmark = pytest.mark.asyncio(loop_scope="session")
+
 
 async def _register(client, name, email):
     r = await client.post("/auth/register", json={"name": name, "email": email, "password": "supersecret1"})
@@ -10,7 +12,6 @@ def _auth(token):
     return {"Authorization": f"Bearer {token}"}
 
 
-@pytest.mark.asyncio
 async def test_ai_default_scopes_exclude_delete(client):
     user_token = await _register(client, "AIUser", "aiuser@example.com")
 
@@ -49,7 +50,6 @@ async def test_ai_default_scopes_exclude_delete(client):
     assert "complete_item" in actions
 
 
-@pytest.mark.asyncio
 async def test_ai_ambiguous_list_name(client):
     user_token = await _register(client, "AmbigUser", "ambig@example.com")
     connect = await client.post(
@@ -66,7 +66,6 @@ async def test_ai_ambiguous_list_name(client):
     assert len(result.json()["lists"]) == 2
 
 
-@pytest.mark.asyncio
 async def test_ai_token_revoked_on_disconnect(client):
     user_token = await _register(client, "RevokeUser", "revoke@example.com")
     connect = await client.post("/integrations/gemini/connect", json={}, headers=_auth(user_token))

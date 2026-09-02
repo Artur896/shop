@@ -7,7 +7,13 @@ from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 
 class Base(DeclarativeBase):
-    pass
+    # Without this, an UPDATE that only touches an `onupdate=func.now()` column (no
+    # other tracked change fetched via RETURNING) leaves the ORM instance holding the
+    # stale in-memory `updated_at` — reading it later doesn't error, it's just wrong.
+    # Worse, under asyncio a *subsequent* implicit refresh of it can hit MissingGreenlet
+    # since lazy IO outside an awaited call isn't valid on an AsyncSession. Fetching
+    # server-generated defaults eagerly on every flush avoids both failure modes.
+    __mapper_args__ = {"eager_defaults": True}
 
 
 class UUIDMixin:

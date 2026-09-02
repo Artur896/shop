@@ -63,9 +63,15 @@ async def connect_integration(
 async def disconnect_integration(db: AsyncSession, user_id: uuid.UUID, provider: AIProvider) -> None:
     integration = await get_or_create_integration(db, user_id, provider)
     integration.status = AIIntegrationStatus.DISCONNECTED
-    for token in list(integration.tokens):
-        if token.revoked_at is None:
-            token.revoked_at = datetime.now(timezone.utc)
+
+    # A query instead of `integration.tokens`: lazy-loading that relationship here
+    # would run outside an awaited call on the AsyncSession and raise MissingGreenlet.
+    tokens = await db.execute(
+        select(AIToken).where(AIToken.integration_id == integration.id, AIToken.revoked_at.is_(None))
+    )
+    now = datetime.now(timezone.utc)
+    for token in tokens.scalars().all():
+        token.revoked_at = now
     await db.flush()
 
 

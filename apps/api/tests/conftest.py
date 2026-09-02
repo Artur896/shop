@@ -18,7 +18,7 @@ from app.db.session import engine  # noqa: E402
 from app.main import app  # noqa: E402
 
 
-@pytest_asyncio.fixture(scope="session", autouse=True)
+@pytest_asyncio.fixture(scope="session", autouse=True, loop_scope="session")
 async def _prepare_database():
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)
@@ -27,7 +27,7 @@ async def _prepare_database():
     await engine.dispose()
 
 
-@pytest_asyncio.fixture
+@pytest_asyncio.fixture(loop_scope="session")
 async def client():
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as ac:

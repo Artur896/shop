@@ -4,6 +4,7 @@ from datetime import datetime, timedelta, timezone
 from fastapi import HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from app.core.config import settings
 from app.models.enums import InvitationStatus, ListRole, MemberStatus, NotificationType
@@ -48,6 +49,11 @@ async def create_invitation(
         role=role,
         expires_at=datetime.now(timezone.utc) + timedelta(days=settings.INVITATION_EXPIRE_DAYS),
     )
+    # Populate the relationship directly from the object require_role() already
+    # fetched, rather than leaving it to lazy-load later — under AsyncSession, an
+    # un-awaited lazy load outside this function raises MissingGreenlet instead of
+    # quietly querying, so this isn't just an optimization.
+    invitation.shopping_list = shopping_list
     db.add(invitation)
     await db.flush()
 
@@ -64,9 +70,9 @@ async def create_invitation(
 
 async def list_pending_invitations(db: AsyncSession, user_id: uuid.UUID) -> list[Invitation]:
     result = await db.execute(
-        select(Invitation).where(
-            Invitation.receiver_id == user_id, Invitation.status == InvitationStatus.PENDING
-        )
+        select(Invitation)
+        .where(Invitation.receiver_id == user_id, Invitation.status == InvitationStatus.PENDING)
+        .options(selectinload(Invitation.sender), selectinload(Invitation.shopping_list))
     )
     return list(result.scalars().all())
 
