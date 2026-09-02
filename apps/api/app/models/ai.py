@@ -1,12 +1,12 @@
 import uuid
 from datetime import datetime
 
-from sqlalchemy import DateTime, Enum, ForeignKey, String, UniqueConstraint, func
+from sqlalchemy import DateTime, ForeignKey, String, UniqueConstraint, func
 from sqlalchemy.dialects.postgresql import ARRAY, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base, TimestampMixin, UUIDMixin
-from app.models.enums import AIIntegrationStatus, AIProvider
+from app.models.enums import AIIntegrationStatus, AIProvider, pg_enum
 
 
 class AIIntegration(UUIDMixin, TimestampMixin, Base):
@@ -16,9 +16,9 @@ class AIIntegration(UUIDMixin, TimestampMixin, Base):
     user_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True
     )
-    provider: Mapped[AIProvider] = mapped_column(Enum(AIProvider, name="ai_provider"), nullable=False)
+    provider: Mapped[AIProvider] = mapped_column(pg_enum(AIProvider, "ai_provider"), nullable=False)
     status: Mapped[AIIntegrationStatus] = mapped_column(
-        Enum(AIIntegrationStatus, name="ai_integration_status"),
+        pg_enum(AIIntegrationStatus, "ai_integration_status"),
         default=AIIntegrationStatus.DISCONNECTED,
         nullable=False,
     )

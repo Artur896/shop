@@ -1,12 +1,12 @@
 import uuid
 from datetime import datetime
 
-from sqlalchemy import DateTime, Enum, ForeignKey
+from sqlalchemy import DateTime, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base, TimestampMixin, UUIDMixin
-from app.models.enums import InvitationStatus, ListRole
+from app.models.enums import InvitationStatus, ListRole, pg_enum
 
 
 class Invitation(UUIDMixin, TimestampMixin, Base):
@@ -21,9 +21,9 @@ class Invitation(UUIDMixin, TimestampMixin, Base):
     receiver_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True
     )
-    role: Mapped[ListRole] = mapped_column(Enum(ListRole, name="invitation_role"), nullable=False)
+    role: Mapped[ListRole] = mapped_column(pg_enum(ListRole, "invitation_role"), nullable=False)
     status: Mapped[InvitationStatus] = mapped_column(
-        Enum(InvitationStatus, name="invitation_status"), default=InvitationStatus.PENDING, nullable=False
+        pg_enum(InvitationStatus, "invitation_status"), default=InvitationStatus.PENDING, nullable=False
     )
     expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
 

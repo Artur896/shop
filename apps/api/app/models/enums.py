@@ -1,5 +1,14 @@
 import enum
 
+from sqlalchemy import Enum as SAEnum
+
+
+def pg_enum(enum_cls: type[enum.Enum], name: str) -> SAEnum:
+    """A Postgres ENUM column for a str-Enum, stored as `.value` ('owner') rather
+    than SQLAlchemy's default of the member `.name` ('OWNER') — matching what the
+    Alembic migration actually declares, and what the JSON API / frontend expect."""
+    return SAEnum(enum_cls, name=name, values_callable=lambda obj: [e.value for e in obj])
+
 
 class ListRole(str, enum.Enum):
     OWNER = "owner"
